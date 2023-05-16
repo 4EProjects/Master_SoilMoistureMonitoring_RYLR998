@@ -149,7 +149,10 @@ void Screen1Data()
   tft.setTextColor(ST7735_WHITE, Display_Color_Blue);
   // Giá trị nhiệt độ môi trường
   tft.setCursor(14, 47);
-  tft.print(TemperatureValue);
+  tft.print(TemperatureValue); 
+  tft.drawCircle(30, 48, 1, ST7735_WHITE);  // print degree symbol ( ° )
+  tft.setCursor(34, 47);
+  tft.print("C");
   // Giá trị độ ẩm môi trường
   tft.setCursor(87, 47);
   tft.print(HumidityValue); tft.print("% ");
