@@ -114,11 +114,8 @@ void EEPROM_LoadSetting()
 
 void RTC_display()
 {   
-   // DateTime now = rtc.now();
     char _buffer[11];
     char dow_matrix[7][10] = {" SUNDAY  ", " MONDAY  ", " TUESDAY ", "WEDNESDAY", " THURSDAY", " FRIDAY  ", " SATURDAY"};
-    //static byte previous_dow = 8;
-
     // print time
     tft.setTextSize(2);
     sprintf( _buffer, "%02u:%02u:%02u", now.hour(), now.minute(), now.second() );
@@ -133,13 +130,9 @@ void RTC_display()
     tft.setCursor(99, 14);
     tft.print(_buffer);
     // print day of the week
-    // tft.setCursor(102, 4);
-    // if( previous_dow != now.dayOfTheWeek() )
-    // {
-    //   previous_dow = now.dayOfTheWeek();
-      tft.setCursor(102, 4);
-      tft.print( dow_matrix[now.dayOfTheWeek()] );
-    // }
+    tft.setCursor(102, 4);
+    tft.print( dow_matrix[now.dayOfTheWeek()] );
+  
 }
 
 void Screen1Data()
@@ -271,7 +264,7 @@ byte edit(int8_t parameter)
       sprintf(text,"%02u", parameter);
       tft.setCursor(x_pos[i], y_pos);
       tft.print(text);
-      delay(200);       // wait 200ms
+      delay(100);       // wait 100ms
     }
     while( !digitalRead(Down_Pin) && digitalRead(Up_Pin) ) {  // while B2 is pressed
       parameter--;
@@ -291,7 +284,7 @@ byte edit(int8_t parameter)
       sprintf(text,"%02u", parameter);
       tft.setCursor(x_pos[i], y_pos);
       tft.print(text);
-      delay(200);       // wait 200ms
+      delay(100);       // wait 100ms
     }
     
 
@@ -400,7 +393,7 @@ void ButtonHandle()
   { 
     if (state == 2) state = 0;
     else state += 1;
-    delay(200);
+    delay(100);
   }
 }
 //___________ getValue() ___________ 
