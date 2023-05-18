@@ -277,7 +277,7 @@ byte edit(int8_t parameter)
       if(i == 3 && parameter < 00)    // if hours < 00 ==> hours = 23
         parameter = 23;
       if(i == 4 && parameter < 00)    // if minutes < 00 ==> minutes = 59
-        parameter = 59;
+        parameter = 5;
       if(i == 5 && parameter < 00)    // if minutes < 00 ==> minutes = 59
         parameter = 1;  
 
