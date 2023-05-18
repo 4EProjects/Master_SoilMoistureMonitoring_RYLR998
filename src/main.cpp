@@ -264,7 +264,7 @@ byte edit(int8_t parameter)
       sprintf(text,"%02u", parameter);
       tft.setCursor(x_pos[i], y_pos);
       tft.print(text);
-      delay(100);       // wait 100ms
+      delay(200);       // wait 200ms
     }
     while( !digitalRead(Down_Pin) && digitalRead(Up_Pin) ) {  // while B2 is pressed
       parameter--;
@@ -284,7 +284,7 @@ byte edit(int8_t parameter)
       sprintf(text,"%02u", parameter);
       tft.setCursor(x_pos[i], y_pos);
       tft.print(text);
-      delay(100);       // wait 100ms
+      delay(200);       // wait 200ms
     }
     
 
@@ -393,7 +393,7 @@ void ButtonHandle()
   { 
     if (state == 2) state = 0;
     else state += 1;
-    delay(100);
+    delay(200);
   }
 }
 //___________ getValue() ___________ 
