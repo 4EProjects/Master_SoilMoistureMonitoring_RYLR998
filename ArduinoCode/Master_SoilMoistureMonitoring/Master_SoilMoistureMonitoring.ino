@@ -46,8 +46,16 @@ SoftwareSerial ReyaxLoRa(5, 4); //--> RX, TX
 
 const unsigned long TIMEOUT = 20000;    // Thời gian chờ tối đa (20 giây)
 unsigned long lastSerialTime = -20000;    // Lưu thời gian gửi tin nhắn gần nhất
-bool buzzerState = false;    // Lưu trạng thái hiện tại của LED
-unsigned long lastBlinkTime = 0; // Lưu thời gian nhấp nháy gần nhất
+
+const unsigned long interval1On = 500;  // Thời gian sáng LED thứ nhất (1 giây)
+const unsigned long interval1Off = 60000;  // Thời gian tắt LED thứ nhất (60 giây)
+const unsigned long interval2On = 1000;  // Thời gian sáng LED thứ hai (1 giây)
+const unsigned long interval2Off = 1000;  // Thời gian tắt LED thứ hai (1 giây)
+
+unsigned long previousMillis1 = 0;  // Lưu trữ thời gian millis() gần nhất cho LED thứ nhất
+unsigned long previousMillis2 = 0;  // Lưu trữ thời gian millis() gần nhất cho LED thứ hai
+bool ledState1 = false;  // Trạng thái hiện tại của LED thứ nhất
+bool textState = false;  // Trạng thái hiện tại của LED thứ hai
 
 // initialize RTC library
 RTC_DS1307 rtc;
@@ -158,10 +166,11 @@ void Screen1Data()
   w_BateryPercent = map(BateryPercent.toInt(), 0, 100, 1, 22);
   if(w_BateryPercent < 1) w_BateryPercent = 1;
   if(w_BateryPercent > 22) w_BateryPercent = 22;
-  tft.fillRect(121, 81, w_BateryPercent, 13, BatteryColor);
   if(BateryPercent.toInt() > 70) BatteryColor = ST7735_GREEN;
   else if(BateryPercent.toInt() <= 70 && BateryPercent.toInt() > 30 ) BatteryColor = ST7735_YELLOW;
   else if(BateryPercent.toInt() <= 30) BatteryColor = ST7735_RED;
+  tft.fillRect(121, 81, w_BateryPercent, 13, BatteryColor);
+  tft.fillRect(121 + w_BateryPercent, 81, 22 - w_BateryPercent, 13, Display_Color_Backgroup);
   // RSSI
   tft.setTextColor(ST7735_GREEN, Display_Color_Backgroup);
   tft.setCursor(127, 113);
@@ -277,7 +286,7 @@ byte edit(int8_t parameter)
       if(i == 3 && parameter < 00)    // if hours < 00 ==> hours = 23
         parameter = 23;
       if(i == 4 && parameter < 00)    // if minutes < 00 ==> minutes = 59
-        parameter = 59;
+        parameter = 5;
       if(i == 5 && parameter < 00)    // if minutes < 00 ==> minutes = 59
         parameter = 1;  
 
@@ -487,25 +496,52 @@ void SignalLoss()
   tft.setCursor(10, 113);
   tft.setTextColor(ST7735_WHITE, Display_Color_Backgroup);
   if (millis() - lastSerialTime > TIMEOUT) {    // Nếu thời gian chờ tối đa đã vượt quá
-    if (millis() - lastBlinkTime > 1000) { // Nếu đã đủ thời gian để nhấp nháy LED
-      buzzerState = !buzzerState;    // Đảo trạng thái của LED
-      //digitalWrite(Buzzer, ledState);    // Cập nhật trạng thái của LED
-      AllowBuzzer(buzzerState, BuzzerState);
-      if(buzzerState == 0) {
-        tft.setTextColor(ST7735_WHITE, ST7735_RED);
-        tft.print("Signal Loss");
-      }
-      if(buzzerState == 1) {
-        tft.setTextColor(ST7735_WHITE, Display_Color_Backgroup);
-        tft.print("           ");
-      }
-      lastBlinkTime = millis(); // Lưu thời gian nhấp nháy gần nhất
-    }
+    unsigned long currentMillis = millis();  // Lấy thời gian millis() hiện tại
+
+  // LED thứ nhất
+  if (ledState1 == false && currentMillis - previousMillis1 >= interval1Off) {
+    ledState1 = true;
+    previousMillis1 = currentMillis;
+  }
+  else if (ledState1 == true && currentMillis - previousMillis1 >= interval1On) {
+    ledState1 = false;
+    previousMillis1 = currentMillis;
+  }
+  AllowBuzzer(ledState1, BuzzerState);
+  // LED thứ hai
+  if (textState == false && currentMillis - previousMillis2 >= interval2Off) {
+    textState = true;
+    previousMillis2 = currentMillis;
+    tft.setTextColor(ST7735_WHITE, ST7735_RED);
+    tft.print("Signal Loss");
+  }
+  else if (textState == true && currentMillis - previousMillis2 >= interval2On) {
+    textState = false;
+    previousMillis2 = currentMillis;
+    tft.setTextColor(ST7735_WHITE, Display_Color_Backgroup);
+    tft.print("           ");
+  }
+
+    
+    // if (millis() - lastBlinkTime > 1000) { // Nếu đã đủ thời gian để nhấp nháy LED
+    //   buzzerState = !buzzerState;    // Đảo trạng thái của LED
+    //   // AllowBuzzer(buzzerState, BuzzerState);
+    //   if(buzzerState == 0) {
+    //     tft.setTextColor(ST7735_WHITE, ST7735_RED);
+    //     tft.print("Signal Loss");
+    //   }
+    //   if(buzzerState == 1) {
+    //     tft.setTextColor(ST7735_WHITE, Display_Color_Backgroup);
+    //     tft.print("           ");
+    //   }
+    //   lastBlinkTime = millis(); // Lưu thời gian nhấp nháy gần nhất
+    // }
   } 
+
   else {
   tft.print("           "); 
   digitalWrite(Buzzer_Pin, LOW);    // Tắt đèn LED nếu còn nhận được tín hiệu
-  lastBlinkTime = millis(); // Lưu thời gian nhấp nháy gần nhất
+  // lastBlinkTime = millis(); // Lưu thời gian nhấp nháy gần nhất
   }
 }
 //_____________ VOID SETUP() _____________
